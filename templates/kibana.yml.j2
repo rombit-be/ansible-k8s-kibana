@@ -1,0 +1,63 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: kibana
+  namespace: elk-stack
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5601
+      targetPort: 5601
+      name: http
+  selector:
+    app: kibana
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kibana
+  namespace: elk-stack
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: kibana
+  template:
+    metadata:
+      labels:
+        app: kibana
+    spec:
+      containers:
+        - name: kibana
+          image: {{ kibana_image }}
+          env:
+          - name: ELASTICSEARCH_URL
+            value: http://{{ elasticsearch_service_name }}:{{ elasticsearch_service_port }}
+{% if kibana_base_path_used|bool %}
+          - name: SERVER_BASEPATH
+            value: "/{{ kibana_base_path }}"
+{% endif %}
+          ports:
+            - containerPort: 5601
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 1500Mi
+            requests:
+              cpu: 50m
+              memory: 800Mi
+          livenessProbe:
+            httpGet:
+              port: 5601
+            initialDelaySeconds: 100
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              port: 5601
+            initialDelaySeconds: 10
+            periodSeconds: 3

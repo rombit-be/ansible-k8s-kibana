@@ -1,0 +1,12 @@
+---
+- name: Prepare kibana deployment file
+  template:
+    src: kibana.yml.j2
+    dest: ./kubernetesconfigs/kibana.yml
+  tags:
+  - kibana
+
+- name: Deploy kibana
+  command: "kubectl apply -f ./kubernetesconfigs/kibana.yml"
+  tags:
+  - kibana

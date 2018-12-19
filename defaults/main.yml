@@ -1,0 +1,5 @@
+---
+kibana_image: docker.elastic.co/kibana/kibana-oss:6.2.4
+elasticsearch_service_name: elasticsearch
+elasticsearch_service_port: 9200
+kibana_base_path: /
